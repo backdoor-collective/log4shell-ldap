@@ -2,16 +2,8 @@ FROM amazoncorretto:8 as javabuilder
 RUN mkdir /build/
 WORKDIR /build
 
-# first make the maven wrapper to download all dependencies
-# build dependencies are modified very rarely so they can be cached by Docker
-COPY java/pom.xml .
-COPY java/mvnw .
-RUN mkdir .mvn
-COPY java/.mvn .mvn
-RUN ./mvnw verify clean --fail-never
-
-# now run the actual build
-COPY java/src/ ./
+# Provide sources
+COPY java .
 RUN ./mvnw package
 
 
