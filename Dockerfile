@@ -1,4 +1,6 @@
-FROM amazoncorretto:8 as javabuilder
+ARG JAVA_VERSION
+
+FROM amazoncorretto:${JAVA_VERSION} as javabuilder
 RUN mkdir /build/
 WORKDIR /build
 
