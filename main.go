@@ -16,6 +16,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 )
 
 //go:embed evilfactory-1.0-SNAPSHOT.jar
@@ -131,13 +132,33 @@ func handleIndex(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, fmt.Sprintf("To test an application make log4j to print %s\n", ldapUrl))
 }
 
+func RequestLogger(targetMux http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		targetMux.ServeHTTP(w, r)
+
+		// log request by who(IP address)
+		requesterIP := r.RemoteAddr
+
+		log.Printf(
+		"%s\t\t%s\t\t%s\t\t%v",
+		r.Method,
+		r.RequestURI,
+		requesterIP,
+		time.Since(start),
+		)
+	})
+}
+
 func startHttpServer() {
 	var staticFS = http.FS(jar)
 	fs := http.FileServer(staticFS)
-	http.Handle("/evilfactory-1.0-SNAPSHOT.jar", fs)
-	http.HandleFunc("/", handleIndex)
+	mux := http.NewServeMux()
+	mux.Handle("/evilfactory-1.0-SNAPSHOT.jar", fs)
+	mux.HandleFunc("/", handleIndex)
 	go func() {
-		err := http.ListenAndServe(":3000", nil)
+		err := http.ListenAndServe(":3000", RequestLogger(mux))
 		if err != nil {
 			panic(err)
 		}
